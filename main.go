@@ -42,19 +42,21 @@ func main() {
 	choose := widget.NewSelect([]string{"Hex", "rgb"}, nil)
 	choose.PlaceHolder = "Hex"
 	choose.Selected = "Hex"
-	copyToClip := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
+	copyAction := func() {
 		c := w.Clipboard()
 		if c == nil {
 			return // can happen in some cases...
 		}
 
 		c.SetContent(output.Text)
-	})
+	}
+	copyToClip := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), copyAction)
 	bar := container.NewBorder(nil, nil, choose, copyToClip, output)
 	w.SetContent(container.NewBorder(nil, bar, nil, nil,
 		container.NewStack(preview, container.NewCenter(highlight))))
 
 	hold := false
+	w.Canvas().AddShortcut(&fyne.ShortcutCopy{}, func(_ fyne.Shortcut) { copyAction() })
 	w.Canvas().AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: fyne.KeyModifierShortcutDefault},
 		func(_ fyne.Shortcut) {
 			hold = !hold
