@@ -97,8 +97,28 @@ func pollPixels(w fyne.Window) <-chan *image.NRGBA {
 		t := time.NewTicker(time.Second / 10)
 		for range t.C {
 			r, _ := xproto.QueryPointer(x11.Conn(), x11.RootWin()).Reply()
-			pix, _ := xproto.GetImage(x11.Conn(), xproto.ImageFormatZPixmap, xproto.Drawable(x11.RootWin()),
-				r.RootX-int16(halfSize), r.RootY-int16(halfSize), pixCount, pixCount, math.MaxUint32).Reply()
+			g, _ := xproto.GetGeometry(x11.Conn(), xproto.Drawable(x11.RootWin())).Reply()
+
+			x, y := r.RootX-int16(halfSize), r.RootY-int16(halfSize)
+			if x < 0 {
+				x = 0
+			}
+			if y < 0 {
+				y = 0
+			}
+			if x >= int16(g.Width)-pixCount {
+				x = int16(g.Width) - pixCount
+			}
+			if y >= int16(g.Height)-pixCount {
+				y = int16(g.Height) - pixCount
+			}
+
+			pix, err := xproto.GetImage(x11.Conn(), xproto.ImageFormatZPixmap, xproto.Drawable(x11.RootWin()),
+				x, y, pixCount, pixCount, math.MaxUint32).Reply()
+			if err != nil {
+				fyne.LogError("failed to read pixel data", err)
+				continue
+			}
 
 			img := image.NewNRGBA(image.Rect(0, 0, pixCount, pixCount))
 			// b, g, r, a
