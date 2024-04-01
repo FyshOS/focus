@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -53,10 +54,19 @@ func main() {
 	w.SetContent(container.NewBorder(nil, bar, nil, nil,
 		container.NewStack(preview, container.NewCenter(highlight))))
 
+	hold := false
+	w.Canvas().AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: fyne.KeyModifierShortcutDefault},
+		func(_ fyne.Shortcut) {
+			hold = !hold
+		})
+
 	go func() {
 		halfSize := (pixCount - 1) / 2
 
 		for pix := range pollPixels(w) {
+			if hold {
+				continue
+			}
 			preview.Image = pix
 			preview.Refresh()
 
