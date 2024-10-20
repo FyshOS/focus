@@ -1,6 +1,6 @@
 module github.com/fyshos/focus
 
-go 1.22.1
+go 1.19
 
 require (
 	fyne.io/fyne/v2 v2.4.4

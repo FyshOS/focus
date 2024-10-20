@@ -73,7 +73,7 @@ func main() {
 			preview.Refresh()
 
 			center := (pixCount*halfSize + halfSize) * 4
-			b, g, r := pix.Pix[center], pix.Pix[center+1], pix.Pix[center+2]
+			r, g, b := pix.Pix[center], pix.Pix[center+1], pix.Pix[center+2]
 			if choose.Selected == "rgb" {
 				output.SetText(fmt.Sprintf("rgb(%d, %d, %d)", r, g, b))
 			} else {
