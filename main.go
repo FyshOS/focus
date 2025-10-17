@@ -20,11 +20,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-const (
-	pixCount = 25
-	pixMin   = 5
-)
-
 func main() {
 	a := app.NewWithID("com.fyshos.focus")
 	w := a.NewWindow("Focus")
@@ -32,11 +27,9 @@ func main() {
 	preview := &canvas.Image{}
 	preview.ScaleMode = canvas.ImageScalePixels
 	preview.FillMode = canvas.ImageFillContain
-	preview.SetMinSize(fyne.NewSquareSize(pixCount * pixMin))
 	highlight := canvas.NewRectangle(color.Transparent)
 	highlight.StrokeColor = theme.ErrorColor()
 	highlight.StrokeWidth = 1
-	highlight.SetMinSize(fyne.NewSquareSize(pixMin + 2))
 
 	output := widget.NewLabel("#000000")
 	choose := widget.NewSelect([]string{"Hex", "rgb"}, nil)
@@ -53,7 +46,7 @@ func main() {
 	copyToClip := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), copyAction)
 	bar := container.NewBorder(nil, nil, choose, copyToClip, output)
 	w.SetContent(container.NewBorder(nil, bar, nil, nil,
-		container.NewStack(preview, container.NewCenter(highlight))))
+		container.NewStack(preview, container.New(highlightLayout{}, highlight))))
 
 	hold := false
 	w.Canvas().AddShortcut(&fyne.ShortcutCopy{}, func(_ fyne.Shortcut) { copyAction() })
@@ -70,15 +63,17 @@ func main() {
 				continue
 			}
 			preview.Image = pix
-			preview.Refresh()
+			fyne.Do(preview.Refresh)
 
 			center := (pixCount*halfSize + halfSize) * 4
 			r, g, b := pix.Pix[center], pix.Pix[center+1], pix.Pix[center+2]
-			if choose.Selected == "rgb" {
-				output.SetText(fmt.Sprintf("rgb(%d, %d, %d)", r, g, b))
-			} else {
-				output.SetText(fmt.Sprintf("#%02x%02x%02x", r, g, b))
-			}
+			fyne.Do(func() {
+				if choose.Selected == "rgb" {
+					output.SetText(fmt.Sprintf("rgb(%d, %d, %d)", r, g, b))
+				} else {
+					output.SetText(fmt.Sprintf("#%02x%02x%02x", r, g, b))
+				}
+			})
 		}
 	}()
 	w.ShowAndRun()
